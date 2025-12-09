@@ -11,3 +11,20 @@ jobs:
           dotnet-version: '8.0.x'
       - run: dotnet restore
       - run: dotnet build
+      - run: dotnet test
+      - run: dotnet publish -o app -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:AssemblyName=app
+      - run: tar cf app.tar app/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app.tar
+          path: app.tar
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app.tar
+      - run: mkdir -p app && tar xf app.tar
+      - run: ./app/app
